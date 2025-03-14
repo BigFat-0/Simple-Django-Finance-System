@@ -152,4 +152,4 @@ No license specified.
 Contact
 -------
 
-For questions, contact \[your email or GitHub username\] at \[your contact info\].
+For questions, contact me at [BigFat0](https://github.com/BoiledPeanuts).
