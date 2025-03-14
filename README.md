@@ -1,5 +1,3 @@
- README - Online Payment Service (Webapps2025) body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f9f9f9; } .container { max-width: 900px; margin: 0 auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); } h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; } h2 { color: #34495e; margin-top: 30px; } h3 { color: #7f8c8d; } p { color: #555; } pre, code { background-color: #f4f4f4; border: 1px solid #ddd; padding: 10px; border-radius: 4px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; } table { width: 100%; border-collapse: collapse; margin: 20px 0; } th, td { border: 1px solid #ddd; padding: 10px; text-align: left; } th { background-color: #3498db; color: white; } tr:nth-child(even) { background-color: #f2f2f2; } ul, ol { margin: 10px 0; padding-left: 20px; } li { margin-bottom: 10px; } strong { color: #2c3e50; } a { color: #3498db; text-decoration: none; } a:hover { text-decoration: underline; } 
-
 Online Payment Service (Webapps2025)
 ====================================
 
