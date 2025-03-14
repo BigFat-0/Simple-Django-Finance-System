@@ -152,4 +152,4 @@ No license specified.
 Contact
 -------
 
-For questions, contact me at [BigFat0](https://github.com/BoiledPeanuts).
+For questions, contact me on [GitHub](https://github.com/BoiledPeanuts).
