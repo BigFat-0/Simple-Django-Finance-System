@@ -59,15 +59,15 @@ To recreate this project on your local machine, follow these steps:
     
     | Username | Email | Password | Currency | Balance |
     | --- | --- | --- | --- | --- |
-    | user1 | user1@example.com | Abc123!!! | GBP | 750.00 |
-    | user2 | user2@example.com | Abc123!!! | USD | 990.00 |
-    | user3 | user3@example.com | Abc123!!! | EUR | 885.00 |
+    | user1 | user1@mail.com | Abc123!!! | GBP | 750.00 |
+    | user2 | user2@mail.com | Abc123!!! | USD | 990.00 |
+    | user3 | user3@mail.com | Abc123!!! | EUR | 885.00 |
     
     #### Admin User
     
     | Username | Email | Password | Is Superuser |
     | --- | --- | --- | --- |
-    | admin | admin@example.com | admin | True |
+    | admin | admin@mail.com | admin | True |
     
     No additional database setup is required; the database is ready for use.
 6.  **Run the Development Server**  
@@ -78,7 +78,7 @@ To recreate this project on your local machine, follow these steps:
 7.  **Access the Application**  
     Open your browser and navigate to:
     
-    * **Main Application**: [http://127.0.0.1:8000/webapps2025/](http://127.0.0.1:8000/webapps2025/)
+    * **Main Application**: [http://127.0.0.1:8000/webapps2025/login](http://127.0.0.1:8000/webapps2025/login)
     * **Admin Interface**: [http://127.0.0.1:8000/webapps2025/admin/](http://127.0.0.1:8000/webapps2025/admin/)
     
     Log in with the preconfigured credentials (e.g., `user1` with password `Abc123!!!` or `admin` with password `admin`).
