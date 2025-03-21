@@ -8,4 +8,5 @@ urlpatterns = [
     path('transactions/', views.transactions, name='transactions'),
     path('pay/', views.make_payment, name='pay'),
     path('request/', views.request_payment, name='request'),
+    path('transaction-history/', views.transaction_history, name='transaction_history'),
 ]

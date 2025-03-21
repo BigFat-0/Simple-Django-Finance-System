@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Transaction History{% endblock %}
+
+{% block content %}
+<h2>Transaction History</h2>
+
+<!-- Combined Transactions -->
+<h3>All Transactions</h3>
+{% if combined_transactions %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Other Party</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trans in combined_transactions %}
+                <tr>
+                    <td>{{ trans.timestamp|date:"Y-m-d H:i" }}</td>
+                    <td>{{ trans.type }}</td>
+                    <td>{{ trans.other_party }}</td>
+                    <td>
+                        {% if trans.converted_amount %}
+                            {{ trans.converted_amount }} {{ trans.user_currency }} ({{ trans.amount }} {{ trans.currency }})
+                        {% else %}
+                            {{ trans.amount }} {{ trans.currency }}
+                        {% endif %}
+                    </td>
+                    <td>{{ trans.status|title }}</td>
+                    <td>
+                        {% if trans.is_payment_request and trans.is_target %}
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="payment_request_id" value="{{ trans.payment_request_id }}">
+                                <button type="submit" name="action" value="accept" class="btn btn-success btn-sm">Accept</button>
+                                <button type="submit" name="action" value="decline" class="btn btn-danger btn-sm">Decline</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No transactions or payment requests found.</p>
+{% endif %}
+
+<!-- Financial History Graph -->
+<h3>Financial History (Today)</h3>
+{% if balance_timestamps|length > 1 or balance_data.0 != balance_data.1 %}
+    <canvas id="balanceChart" width="400" height="200"></canvas>
+    <script>
+        const ctx = document.getElementById('balanceChart').getContext('2d');
+        const balanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ balance_timestamps|safe }},
+                datasets: [{
+                    label: 'Balance ({{ user.currency }})',
+                    data: {{ balance_data|safe }},
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time (Today)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Balance ({{ user.currency }})'
+                        },
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    </script>
+{% else %}
+    <p>No transactions today. Balance remains at {{ balance_data.0 }} {{ user.currency }}.</p>
+{% endif %}
+{% endblock %}
