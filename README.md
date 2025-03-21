@@ -1,10 +1,10 @@
-Online Payment Service
-======================
+Online Payment Service - Secondary Branch
+=========================================
 
 Introduction
 ------------
 
-Welcome to the **Online Payment Service**, a Django-based web application designed to facilitate secure payments and payment requests between users with support for multiple currencies (GBP, USD, and EUR). This project fulfills an academic assignment by implementing user registration, authentication, payment processing, payment requests, and an administrative interface, with currency conversion handled via a dedicated RESTful API. The application ensures a seamless user experience with Bootstrap 5 styling and maintains data integrity using a SQLite database. This repository contains the complete source code, including migration files and a preconfigured database with sample users, making it easy to set up and explore.
+Welcome to the **Online Payment Service**, a Django-based web application designed to facilitate secure payments and payment requests between users with support for multiple currencies (GBP, USD, and EUR). This project fulfills an academic assignment by implementing user registration, authentication, payment processing, payment requests, and an administrative interface, with currency conversion handled via a dedicated RESTful API. The application ensures a seamless user experience with Bootstrap 5 styling and maintains data integrity using a SQLite database. This branch provides the source code and migration files but does not include a preconfigured database, allowing you to set up a fresh environment.
 
 The project showcases:
 
@@ -12,7 +12,7 @@ The project showcases:
 * **Payment Functionality**: Direct payments and payment requests with automatic currency conversion.
 * **RESTful API**: A separate endpoint for currency conversion using hard-coded exchange rates.
 * **Admin Interface**: Full administrative control, including user and transaction management.
-* **Database**: Prepopulated with sample users and transactions for immediate use.
+* **Database**: Set up a new SQLite database to store user and transaction data.
 
 This README provides step-by-step instructions to recreate the environment, run the application, and explore its features.
 
@@ -32,9 +32,10 @@ To recreate this project on your local machine, follow these steps:
 1.  **Clone the Repository**  
     Clone this repository to your local machine using:
     
-        git clone https://github.com/yourusername/webapps2025.git
+        git clone -b secondary https://github.com/yourusername/webapps2025.git
         cd webapps2025
     
+    (Note: Replace `secondary` with the actual name of your secondary branch if different.)
 2.  **Set Up a Virtual Environment**  
     Create and activate a virtual environment:
     
@@ -48,41 +49,39 @@ To recreate this project on your local machine, follow these steps:
     
     (Note: If `requirements.txt` is missing, generate it with `pip freeze > requirements.txt` after installing dependencies manually.)
 4.  **Apply Migrations**  
-    The repository includes migration files. Apply them to set up the database schema:
+    The repository includes migration files. Apply them to set up the database schema and create a new SQLite database (`webapps.db`):
     
         python manage.py migrate
     
-5.  **Use the Preconfigured Database**  
-    The repository includes a pre-existing SQLite database (`webapps.db`) with:
+5.  **Create a Superuser**  
+    Since this branch does not include a preconfigured database, create a superuser to access the admin interface:
     
-    #### Sample Users
+        python manage.py createsuperuser
     
-    | Username | Email | Password | Currency | Balance |
-    | --- | --- | --- | --- | --- |
-    | user1 | user1@mail.com | Abc123!!! | GBP | 750.00 |
-    | user2 | user2@mail.com | Abc123!!! | USD | 990.00 |
-    | user3 | user3@mail.com | Abc123!!! | EUR | 885.00 |
-    
-    #### Admin User
-    
-    | Username | Email | Password | Is Superuser |
-    | --- | --- | --- | --- |
-    | admin | admin@mail.com | admin | True |
-    
-    No additional database setup is required; the database is ready for use.
-6.  **Run the Development Server**  
+    Follow the prompts to set a username, email, and password (e.g., username: `admin`, password: `admin`).
+6.  **Create Sample Users**  
+    To test the application, register sample users via the registration page:
+    * Navigate to [http://127.0.0.1:8000/webapps2025/register/](http://127.0.0.1:8000/webapps2025/register/) after starting the server.
+    * Create users with different currencies (e.g., user1 with GBP, user2 with USD, user3 with EUR).
+    * Example user setup:
+        
+        | Username | Email | Password | Currency |
+        | --- | --- | --- | --- |
+        | user1 | user1@mail .com | Abc123!!! | GBP |
+        | user2 | user2@mail.com | Abc123!!! | USD |
+        | user3 | user3@mail.com | Abc123!!! | EUR |
+        
+    * Each user will start with a balance equivalent to 750 GBP, converted to their chosen currency (e.g., 750 GBP, 990 USD, 885 EUR).
+7.  **Run the Development Server**  
     Start the Django server:
     
         python manage.py runserver
     
-7.  **Access the Application**  
+8.  **Access the Application**  
     Open your browser and navigate to:
-    
     * **Main Application**: [http://127.0.0.1:8000/webapps2025/login](http://127.0.0.1:8000/webapps2025/login)
-    * **Admin Interface**: [http://127.0.0.1:8000/webapps2025/admin/](http://127.0.0.1:8000/webapps2025/admin/)
-    
-    Log in with the preconfigured credentials (e.g., `user1` with password `Abc123!!!` or `admin` with password `admin`).
-8.  **Explore Features**  
+    * **Admin Interface**: [http://127.0.0.1:8000/webapps2025/admin/](http://127.0.0.1:8000/webapps2025/admin/)Log in with the superuser credentials you created or register new users to test the application.
+9.  **Explore Features**  
     Register new users, send payments, request payments, and manage transactions.  
     Use the admin interface to view or edit data (superuser privileges required for balance changes).
 
@@ -98,7 +97,6 @@ Project Structure
 * `register/`: Handles user registration, login, and authentication.
 * `templates/`: HTML templates with Bootstrap 5 styling.
 * `webapps2025/`: Project configuration files (settings, URLs, etc.).
-* `webapps.db`: Prepopulated SQLite database with sample data.
 * `migrations/`: Database migration files for schema setup.
 
 Dependencies
@@ -134,7 +132,7 @@ During the development of this project, several challenges were encountered and 
 * **Currency Conversion Consistency**: Initially, the registration form (`register/forms.py`) implemented its own hardcoded currency conversion (e.g., 750 * 1.18 for EUR), duplicating logic from the RESTful API. This risked inconsistency if rates changed. **Solution**: The form was updated to use the `/api/convert/` endpoint via the `convert_currency` utility, ensuring all conversions align with the API’s hard-coded rates.
 * **Admin Interface Balance Editing**: The `balance` field was set as read-only in the admin interface, preventing necessary adjustments. **Solution**: Implemented dynamic read-only logic in `register/admin.py`, allowing superusers to edit balances while restricting non-superusers, with a `PermissionDenied` check for security.
 * **Payment Request Direction**: The payment request system initially deducted money from the requester instead of the target, reversing the intended flow (e.g., User 1 requesting from User 2). **Solution**: Adjusted the `transactions` view in `payapp/views.py` to deduct from the target’s balance and credit the requester, with proper currency conversion.
-* **Initial Database Setup**: Recreating the project required consistent database initialization, including sample users. **Solution**: Included a preconfigured `webapps.db` with users (user1, user2, user3) and an admin, avoiding manual setup steps.
+* **Initial Database Setup**: Recreating the project required consistent database initialization, including sample users. **Solution**: Provided detailed instructions to create a new database and register sample users, ensuring a consistent starting point for testing.
 
 These solutions enhanced the project’s reliability, compliance with assignment requirements, and usability for future developers or evaluators.
 
