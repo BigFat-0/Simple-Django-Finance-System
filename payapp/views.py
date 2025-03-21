@@ -6,7 +6,6 @@ from register.models import User
 from django.contrib import messages
 from decimal import Decimal
 from django.utils import timezone
-from datetime import timedelta
 # For Currency Exchange
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -25,7 +24,7 @@ def transactions(request):
     requests_sent = PaymentRequest.objects.filter(requester=request.user)
     requests_received = PaymentRequest.objects.filter(target=request.user)
 
-    # Convert amounts for display (recipient sees amount in their currency)
+    # Convert amounts
     for req in requests_received:
         if req.status == 'pending':
             req.display_amount, req.display_currency = convert_currency(req.amount, req.requester.currency,
@@ -41,23 +40,23 @@ def transactions(request):
             payment_request = PaymentRequest.objects.get(id=payment_request_id, target=request.user)
             if action == 'accept':
                 with transaction.atomic():
-                    # Convert the amount to the target's currency for deduction
+                    # Convert the amount to the target's currency
                     converted_amount, target_currency = convert_currency(payment_request.amount,
                                                                          payment_request.requester.currency,
                                                                          request.user.currency)
-                    if request.user.balance >= converted_amount:  # Check if the target (User 2) has enough funds
-                        # Deduct converted amount from target's balance (User 2)
+                    if request.user.balance >= converted_amount:  # Check if the target has enough money
+                        # Deduct converted amount from balanc
                         request.user.balance -= converted_amount
-                        # Add original amount to requester's balance (User 1)
+                        # Add amount to requester's balance
                         payment_request.requester.balance += payment_request.amount
                         request.user.save()
                         payment_request.requester.save()
                         payment_request.status = 'accepted'
-                        # Record transaction: User 2 sends to User 1
+                        # Record transaction
                         Transaction.objects.create(
-                            sender=request.user,  # User 2 (target) sends
-                            receiver=payment_request.requester,  # User 1 (requester) receives
-                            amount=payment_request.amount,  # Record in requester's currency
+                            sender=request.user,
+                            receiver=payment_request.requester,
+                            amount=payment_request.amount,
                             status='completed'
                         )
                         messages.success(request,
@@ -171,23 +170,23 @@ def transaction_history(request):
             payment_request = PaymentRequest.objects.get(id=payment_request_id, target=request.user)
             if action == 'accept':
                 with transaction.atomic():
-                    # Convert the amount to the target's currency for deduction
+                    # Convert the amount to the target's currency
                     converted_amount, target_currency = convert_currency(payment_request.amount,
                                                                         payment_request.requester.currency,
                                                                         request.user.currency)
-                    if request.user.balance >= converted_amount:  # Check if the target has enough funds
-                        # Deduct converted amount from target's balance
+                    if request.user.balance >= converted_amount:  # Check if the user has enough money
+                        # Deduct amount from balance
                         request.user.balance -= converted_amount
-                        # Add original amount to requester's balance
+                        # Add amount to requester's balance
                         payment_request.requester.balance += payment_request.amount
                         request.user.save()
                         payment_request.requester.save()
                         payment_request.status = 'accepted'
-                        # Record transaction: Target sends to Requester
+                        # Record transaction
                         Transaction.objects.create(
-                            sender=request.user,  # Target sends
-                            receiver=payment_request.requester,  # Requester receives
-                            amount=payment_request.amount,  # Record in requester's currency
+                            sender=request.user,
+                            receiver=payment_request.requester,
+                            amount=payment_request.amount,
                             status='completed'
                         )
                         messages.success(request,
@@ -205,7 +204,7 @@ def transaction_history(request):
             messages.error(request, f"An error occurred: {str(e)}")
         return redirect('payapp:transaction_history')
 
-    # Fetch all transactions and payment requests
+    # Fetch all transactions and requests
     sent_transactions = Transaction.objects.filter(sender=request.user)
     received_transactions = Transaction.objects.filter(receiver=request.user)
     pending_requests = PaymentRequest.objects.filter(
@@ -213,7 +212,7 @@ def transaction_history(request):
         status='pending'
     )
 
-    # Combine into a single list with type indicators
+    # Combine into a single list
     combined_transactions = []
     for trans in sent_transactions:
         combined_transactions.append({
@@ -221,26 +220,25 @@ def transaction_history(request):
             'timestamp': trans.timestamp,
             'other_party': trans.receiver.username,
             'amount': trans.amount,
-            'currency': trans.sender.currency,  # Sender's currency (user's currency)
+            'currency': trans.sender.currency,
             'status': trans.status,
             'is_payment_request': False,
         })
     for trans in received_transactions:
-        # Convert the amount to the user's currency for display
         converted_amount, user_currency = convert_currency(trans.amount, trans.sender.currency, request.user.currency)
         combined_transactions.append({
             'type': 'Incoming',
             'timestamp': trans.timestamp,
             'other_party': trans.sender.username,
             'amount': trans.amount,
-            'currency': trans.sender.currency,  # Sender's currency
+            'currency': trans.sender.currency,
             'converted_amount': converted_amount,
             'user_currency': user_currency,
             'status': trans.status,
             'is_payment_request': False,
         })
     for req in pending_requests:
-        # Convert the amount to the user's currency for display if the user is the target
+        # Convert the amount
         if req.target == request.user:
             converted_amount, user_currency = convert_currency(req.amount, req.requester.currency, request.user.currency)
         else:
@@ -259,14 +257,14 @@ def transaction_history(request):
             'is_target': req.target == request.user,
         })
 
-    # Sort by timestamp (descending)
+    # Sort by timestamp
     combined_transactions.sort(key=lambda x: x['timestamp'], reverse=True)
 
     # Calculate balance history for today
     today = timezone.now()
     start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
 
-    # Get all transactions before today to calculate the starting balance
+    # Calculate the starting balance
     transactions_before_today = Transaction.objects.filter(
         models.Q(sender=request.user) | models.Q(receiver=request.user),
         timestamp__lt=start_of_day
@@ -276,10 +274,10 @@ def transaction_history(request):
     initial_balance = request.user.balance
     for trans in transactions_before_today:
         if trans.sender == request.user:
-            # Outgoing: Add the amount back (reverse the deduction)
+            # Outgoing
             initial_balance += trans.amount
         elif trans.receiver == request.user:
-            # Incoming: Subtract the amount (reverse the addition)
+            # Incoming
             converted_amount, _ = convert_currency(trans.amount, trans.sender.currency, request.user.currency)
             initial_balance -= converted_amount
 
@@ -290,25 +288,25 @@ def transaction_history(request):
         timestamp__lte=today
     ).order_by('timestamp')
 
-    # Build balance history for today
+    # Build history
     balance_history = [(start_of_day, float(initial_balance))]
     current_balance = initial_balance
     for trans in today_transactions:
         if trans.sender == request.user:
-            # Outgoing: Deduct the amount
+            # Outgoing
             current_balance -= trans.amount
         elif trans.receiver == request.user:
-            # Incoming: Add the converted amount
+            # Incoming
             converted_amount, _ = convert_currency(trans.amount, trans.sender.currency, request.user.currency)
             current_balance += converted_amount
         balance_history.append((trans.timestamp, float(current_balance)))
 
-    # Prepare data for the graph
+    # graph
     if balance_history:
         balance_timestamps = [entry[0].strftime('%H:%M:%S') for entry in balance_history]
         balance_data = [entry[1] for entry in balance_history]
     else:
-        # If no transactions today, show a flat line at the initial balance
+        # If no transactions today, show a flat line
         balance_timestamps = [start_of_day.strftime('%H:%M:%S'), today.strftime('%H:%M:%S')]
         balance_data = [float(initial_balance), float(initial_balance)]
 

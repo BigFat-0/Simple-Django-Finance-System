@@ -51,7 +51,7 @@
     <p>No transactions or payment requests found.</p>
 {% endif %}
 
-<!-- Financial History Graph -->
+<!-- Financial History -->
 <h3>Financial History (Today)</h3>
 {% if balance_timestamps|length > 1 or balance_data.0 != balance_data.1 %}
     <canvas id="balanceChart" width="400" height="200"></canvas>

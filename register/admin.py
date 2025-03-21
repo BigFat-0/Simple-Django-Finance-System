@@ -47,7 +47,7 @@ class UserAdmin(BaseUserAdmin):
                 readonly_fields.append('balance')
         return readonly_fields
 
-    # Restrict balance changes to superusers
+    # Restrict changes to superusers
     def has_change_permission(self, request, obj=None):
         if obj and 'balance' in request.POST and not request.user.is_superuser:
             raise PermissionDenied("Only superusers can change the balance.")
